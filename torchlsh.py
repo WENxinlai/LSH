@@ -189,9 +189,12 @@ class LSHash(object):
 
         result = torch.full((batch_size, k), -1, dtype=torch.long)
 
-        for i, idx in enumerate(in_bucket_idx):
-            result[idx] = indices[i]
+        # for i, idx in enumerate(in_bucket_idx):
+        #     result[idx] = indices[i]
+        expanded_in_bucket_idx = in_bucket_idx.unsqueeze(1).expand(batch_size, k)
 
+        # 使用 scatter 函数将 indices 根据 in_bucket_idx 分散到 result 中
+        result.scatter_(dim=0, index=expanded_in_bucket_idx, src=indices)
         return result
 
     def query2(self, x, query_point, k=None, distance_func=None):
